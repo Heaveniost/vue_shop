@@ -61,9 +61,15 @@
         },
         methods: {
             login() {
-                this.$refs.loginFormRef.validate((valid, object) => {
-                    console.log(valid);
-                    console.log(object) //object could be omitted.
+                this.$refs.loginFormRef.validate(async valid => {
+                    // console.log(valid);
+                    if (!valid) return;
+                    // 两种方法获取data
+                    // const result = await this.$http.post('login', this.loginForm);
+                    // console.log(result.data)
+                    const { data: res } = await this.$http.post('login', this.loginForm);
+                    if (res.meta.status !== 200) return console.log('login failed');
+                    console.log('login success');
                 })
             },
             // reset button events
