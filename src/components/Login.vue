@@ -6,7 +6,7 @@
                 <img src="../assets/logo.png" alt="">
             </div>
             <!-- login form -->
-            <el-form :model="loginForm" :rules="rules" label-width="0px" class="login-form">
+            <el-form ref="loginFormRef" :model="loginForm" :rules="rules" label-width="0px" class="login-form">
                 <el-form-item  prop="username">
                     <el-input v-model="loginForm.username" prefix-icon="el-icon-user"></el-input>
                 </el-form-item>
@@ -16,7 +16,7 @@
                 </el-form-item>
                 <el-form-item class="btns">
                     <el-button type="primary">Login</el-button>
-                    <el-button type="info">Reset</el-button>
+                    <el-button type="info" @click="resetLoginForm">Reset</el-button>
                 </el-form-item>
             </el-form>
         </div>
@@ -57,6 +57,13 @@
                             trigger: 'blur'
                         }],
                 }
+            }
+        },
+        methods: {
+            // reset button events
+            resetLoginForm() {
+                // console.log(this) this里有很多属性
+                this.$refs.loginFormRef.resetFields()
             }
         }
     }
