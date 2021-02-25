@@ -1,14 +1,14 @@
 <template>
   <div id="app">
-     I am Hurst
+    <!-- 路由占位符 -->
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
-
-export default {
-  name: 'app',
-}
+  export default {
+    name: 'app',
+  }
 </script>
 
 <style>
