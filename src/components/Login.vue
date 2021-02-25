@@ -68,8 +68,8 @@
                     // const result = await this.$http.post('login', this.loginForm);
                     // console.log(result.data)
                     const { data: res } = await this.$http.post('login', this.loginForm);
-                    if (res.meta.status !== 200) return console.log('login failed');
-                    console.log('login success');
+                    if (res.meta.status !== 200) return this.$message.error('login failed');
+                    this.$message.success('login success');
                 })
             },
             // reset button events
