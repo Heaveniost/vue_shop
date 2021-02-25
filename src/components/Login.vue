@@ -6,12 +6,13 @@
                 <img src="../assets/logo.png" alt="">
             </div>
             <!-- login form -->
-            <el-form :model="loginForm" label-width="0px" class="login-form">
-                <el-form-item>
+            <el-form :model="loginForm" :rules="rules" label-width="0px" class="login-form">
+                <el-form-item  prop="username">
                     <el-input v-model="loginForm.username" prefix-icon="el-icon-user"></el-input>
                 </el-form-item>
-                <el-form-item>
-                    <el-input v-model="loginForm.password" prefix-icon="el-icon-lock" type="password"></el-input>
+                <el-form-item  prop="password">
+                    <el-input v-model="loginForm.password" prefix-icon="el-icon-lock" type="password">
+                    </el-input>
                 </el-form-item>
                 <el-form-item class="btns">
                     <el-button type="primary">Login</el-button>
@@ -30,6 +31,31 @@
                 loginForm: {
                     username: 'zs',
                     password: '123'
+                },
+                rules: {
+                    username: [{
+                            required: true,
+                            message: 'Please input Username',
+                            trigger: 'blur'
+                        },
+                        {
+                            min: 3,
+                            max: 10,
+                            message: 'Length should be 3 to 10',
+                            trigger: 'blur'
+                        }
+                    ],
+                    password: [{
+                        required: true,
+                        message: 'Please input Password',
+                        trigger: 'change'
+                    },
+                    {
+                            min: 6,
+                            max: 15,
+                            message: 'Length should be 6 to 15',
+                            trigger: 'blur'
+                        }],
                 }
             }
         }
@@ -71,6 +97,7 @@
                 background-color: #eee;
             }
         }
+
         .login-form {
             box-sizing: border-box;
             position: absolute;
@@ -78,6 +105,7 @@
             width: 100%;
             padding: 0 10px;
         }
+
         .btns {
             display: flex;
             justify-content: flex-end;
