@@ -11,7 +11,27 @@
         <!-- main -->
         <el-container>
             <!-- 侧边栏 -->
-            <el-aside width="200px">Aside</el-aside>
+            <el-aside width="200px">
+                <!-- 侧边栏导航区域 -->
+                <el-menu default-active="2" class="el-menu-vertical-demo" 
+                    background-color="#333744" text-color="#fff" active-text-color="#409bff">
+                    <el-submenu :index="item.id + ''" v-for="item in menuList" :key="item.id">
+                        <!-- 一级菜单的模板区域 -->
+                        <template slot="title">
+                            <i :class="icons[item.id]"></i>
+                            <span>{{ item.authName }}</span>
+                        </template>
+
+                        <!-- 二级菜单 -->
+                        <el-menu-item :index="subItem.id + ''" v-for="subItem in item.children" :key="subItem.id">
+                            <template slot="title">
+                                <i class="el-icon-menu"></i>
+                                <span>{{ subItem.authName }}</span>
+                            </template>
+                        </el-menu-item>
+                    </el-submenu>
+                </el-menu>
+            </el-aside>
             <!-- 右侧内容 -->
             <el-main>Main</el-main>
         </el-container>
@@ -20,10 +40,34 @@
 
 <script>
     export default {
+        data() {
+            return {
+                // 左侧菜单数据
+                menuList: [],
+                icons: {
+                    '125': 'el-icon-user',
+                    '103': 'el-icon-help',
+                    '101': 'el-icon-goods',
+                    '102': 'el-icon-s-order',
+                    '145': 'el-icon-data-line'
+                }
+            }
+        },
+        created() {
+            this.getMenuList()
+        },
         methods: {
             logout() {
                 window.sessionStorage.clear();
                 this.$router.push('/login');
+            },
+            // 获取所有的菜单
+            async getMenuList() {
+                const { data: res } = await this.$http.get('menus')
+                if (res.meta.status !== 200) return this.$http.message.error(res.meta.msg)
+                this.menuList = res.data
+                console.log(res)
+                console.log(this.menuList)
             }
         }
     }
@@ -33,6 +77,7 @@
     .home-container {
         height: 100%;
     }
+
     .el-header {
         background-color: #373d41;
         display: flex;
@@ -45,7 +90,7 @@
         div {
             display: flex;
             align-items: center;
-            
+
             span {
                 margin-left: 15px;
             }
@@ -56,9 +101,11 @@
             height: 50px;
         }
     }
+
     .el-aside {
         background-color: #333744;
     }
+
     .el-main {
         background-color: #EAEDF1;
     }
