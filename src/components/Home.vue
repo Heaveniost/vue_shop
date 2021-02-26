@@ -34,7 +34,10 @@
                 </el-menu>
             </el-aside>
             <!-- 右侧内容 -->
-            <el-main>Main</el-main>
+            <el-main>
+                <!-- 路由占位符 -->
+                <router-view></router-view>
+            </el-main>
         </el-container>
     </el-container>
 </template>
@@ -52,7 +55,7 @@
                     '102': 'el-icon-s-order',
                     '145': 'el-icon-data-line'
                 },
-                isCollapse: true //是否折叠
+                isCollapse: false //是否折叠
             }
         },
         created() {
