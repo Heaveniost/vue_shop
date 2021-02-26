@@ -14,8 +14,9 @@
             <el-aside :width="isCollapse ? '64px' : '200px'">
                 <div class="toggle-button" @click="toggleCollapse">|||</div>
                 <!-- 侧边栏导航区域 -->
-                <el-menu default-active="2" class="el-menu-vertical-demo" background-color="#333744"
-                     text-color="#fff" active-text-color="#409bff" unique-opened :collapse="isCollapse" :collapse-transition="false">
+                <el-menu class="el-menu-vertical-demo" background-color="#333744"
+                     text-color="#fff" active-text-color="#409bff" unique-opened :collapse="isCollapse" 
+                     :collapse-transition="false" router :default-active="activePath">
                     <el-submenu :index="item.id + ''" v-for="item in menuList" :key="item.id">
                         <!-- 一级菜单的模板区域 -->
                         <template slot="title">
@@ -24,7 +25,8 @@
                         </template>
 
                         <!-- 二级菜单 -->
-                        <el-menu-item :index="subItem.id + ''" v-for="subItem in item.children" :key="subItem.id">
+                        <el-menu-item :index="'/' + subItem.path" v-for="subItem in item.children" :key="subItem.id"
+                            @click="saveNavState('/' + subItem.path)">
                             <template slot="title">
                                 <i class="el-icon-menu"></i>
                                 <span>{{ subItem.authName }}</span>
@@ -55,11 +57,13 @@
                     '102': 'el-icon-s-order',
                     '145': 'el-icon-data-line'
                 },
-                isCollapse: false //是否折叠
+                isCollapse: false, //是否折叠
+                activePath: '', //激活的链接地址
             }
         },
         created() {
             this.getMenuList()
+            this.activePath = window.sessionStorage.getItem('activePath')
         },
         methods: {
             logout() {
@@ -77,6 +81,11 @@
             // 点击展开与折叠菜单栏
             toggleCollapse() {
                 this.isCollapse = !this.isCollapse
+            },
+            // 存储链接的激活状态
+            saveNavState(activePath) {
+                window.sessionStorage.setItem('activePath', activePath)
+                this.activePath = activePath
             }
         }
     }
