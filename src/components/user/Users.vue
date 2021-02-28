@@ -17,7 +17,7 @@
                     </el-input>
                 </el-col>
                 <el-col :span="4">
-                    <el-button type="primary">add user</el-button>
+                    <el-button type="primary" @click="addDialogVisible = true">add user</el-button>
                 </el-col>
             </el-row>
 
@@ -44,6 +44,28 @@
                 </el-table-column>
             </el-table>
 
+            <!-- add user dialog -->
+            <el-dialog title="Add New User" :visible.sync="addDialogVisible" width="50%" @close="addDialogClosed">
+                <el-form :model="addForm" :rules="addFormRules" ref="addFormRef" label-width="100px">
+                    <el-form-item label="username" prop="username">
+                        <el-input v-model="addForm.username"></el-input>
+                    </el-form-item>
+                    <el-form-item label="password" prop="password">
+                        <el-input v-model="addForm.password"></el-input>
+                    </el-form-item>
+                    <el-form-item label="email" prop="email">
+                        <el-input v-model="addForm.email"></el-input>
+                    </el-form-item>
+                    <el-form-item label="phone" prop="phone">
+                        <el-input v-model="addForm.phone"></el-input>
+                    </el-form-item>
+                </el-form>
+                <span slot="footer" class="dialog-footer">
+                    <el-button @click="addDialogVisible = false">Cancel</el-button>
+                    <el-button type="primary" @click="addDialogVisible = false">Confirm</el-button>
+                </span>
+            </el-dialog>
+
             <!-- pagination area -->
             <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
                 :current-page.sync="queryInfo.pagenum" :page-sizes="[1, 2, 5, 10]" :page-size="queryInfo.pagesize"
@@ -57,6 +79,19 @@
 <script>
     export default {
         data() {
+            // custom email and phone validation rules
+            var checkEmail = (rule, value, callback) => {
+                const regEmail = /^[A-Za-z\d]+([-_.][A-Za-z\d]+)*@([A-Za-z\d]+[-.])+[A-Za-z\d]{2,4}$/
+                if (regEmail.test(value)) return callback()
+                callback(new Error('Please input valid email'))
+            }
+
+            var checkPhone = (rule, value, callback) => {
+                const regPhone = /^[1][3,4,5,7,8][0-9]{9}$/
+                if (regPhone.test(value)) return callback()
+                callback(new Error('Please input valid phone number'))
+            }
+
             return {
                 // user list query parameters object 
                 queryInfo: {
@@ -66,7 +101,61 @@
                 },
                 userlist: [],
                 total: 0,
-                value1: false
+                value1: false,
+                addDialogVisible: false, //show and hide add user dialog
+                // add form data
+                addForm: {
+                    username: '',
+                    password: '',
+                    email: '',
+                    phone: ''
+                },
+                addFormRules: {
+                    username: [{
+                            required: true,
+                            message: 'Please input Username',
+                            trigger: 'blur'
+                        },
+                        {
+                            min: 3,
+                            max: 10,
+                            message: 'Length should be 3 to 10',
+                            trigger: 'blur'
+                        }
+                    ],
+                    password: [{
+                            required: true,
+                            message: 'Please input Password',
+                            trigger: 'blur'
+                        },
+                        {
+                            min: 6,
+                            max: 15,
+                            message: 'Length should be 6 to 15',
+                            trigger: 'blur'
+                        }
+                    ],
+                    email: [{
+                            required: true,
+                            message: 'Please input Email',
+                            trigger: 'blur'
+                        },
+                        {
+                            validator: checkEmail,
+                            trigger: 'blur'
+                        }
+                    ],
+                    phone: [{
+                            required: true,
+                            message: 'Please input Phone',
+                            trigger: 'blur'
+                        },
+                        {
+                            validator: checkPhone,
+                            trigger: 'blur'
+                        }
+                    ],
+                }
             }
         },
         created() {
@@ -105,6 +194,10 @@
                     return this.$message.error('Failed to update user info')
                 }
                 this.$message.success('Succeed to update user info')
+            },
+            // add a dialog close event 
+            addDialogClosed() {
+                this.$refs.addFormRef.resetFields()
             }
         }
     }
