@@ -30,7 +30,7 @@
                 <el-table-column label="role" prop="role_name"></el-table-column>
                 <el-table-column label="state">
                     <template v-slot="scope">
-                        <el-switch v-model="scope.row.mg_state"></el-switch>
+                        <el-switch v-model="scope.row.mg_state" @change="userStateChanged(scope.row)"></el-switch>
                     </template>
                 </el-table-column>
                 <el-table-column label="operation" width="180px">
@@ -93,6 +93,18 @@
                 console.log(`current page: ${val}`);
                 this.queryInfo.pagenum = val
                 this.getUserList()
+            },
+            // 监听swtich开关的改变
+            async userStateChanged(userinfo) {
+                // console.log(userinfo)
+                const {
+                    data: res
+                } = await this.$http.put(`users/${userinfo.id}/state/${userinfo.mg_state}`)
+                if (res.meta.status !== 200) {
+                    userinfo.mg_state = !userinfo.mg_state
+                    return this.$message.error('Failed to update user info')
+                }
+                this.$message.success('Succeed to update user info')
             }
         }
     }
