@@ -26,7 +26,7 @@
                 <el-table-column type="index"></el-table-column>
                 <el-table-column label="name" prop="username"></el-table-column>
                 <el-table-column label="email" prop="email"></el-table-column>
-                <el-table-column label="phone" prop="mobile"></el-table-column>
+                <el-table-column label="mobile" prop="mobile"></el-table-column>
                 <el-table-column label="role" prop="role_name"></el-table-column>
                 <el-table-column label="state">
                     <template v-slot="scope">
@@ -56,13 +56,13 @@
                     <el-form-item label="email" prop="email">
                         <el-input v-model="addForm.email"></el-input>
                     </el-form-item>
-                    <el-form-item label="phone" prop="phone">
-                        <el-input v-model="addForm.phone"></el-input>
+                    <el-form-item label="mobile" prop="mobile">
+                        <el-input v-model="addForm.mobile"></el-input>
                     </el-form-item>
                 </el-form>
                 <span slot="footer" class="dialog-footer">
                     <el-button @click="addDialogVisible = false">Cancel</el-button>
-                    <el-button type="primary" @click="addDialogVisible = false">Confirm</el-button>
+                    <el-button type="primary" @click="addUser">Confirm</el-button>
                 </span>
             </el-dialog>
 
@@ -79,17 +79,17 @@
 <script>
     export default {
         data() {
-            // custom email and phone validation rules
+            // custom email and mobile validation rules
             var checkEmail = (rule, value, callback) => {
                 const regEmail = /^[A-Za-z\d]+([-_.][A-Za-z\d]+)*@([A-Za-z\d]+[-.])+[A-Za-z\d]{2,4}$/
                 if (regEmail.test(value)) return callback()
                 callback(new Error('Please input valid email'))
             }
 
-            var checkPhone = (rule, value, callback) => {
-                const regPhone = /^[1][3,4,5,7,8][0-9]{9}$/
-                if (regPhone.test(value)) return callback()
-                callback(new Error('Please input valid phone number'))
+            var checkmobile = (rule, value, callback) => {
+                const regmobile = /^[1][3,4,5,7,8][0-9]{9}$/
+                if (regmobile.test(value)) return callback()
+                callback(new Error('Please input valid mobile number'))
             }
 
             return {
@@ -108,7 +108,7 @@
                     username: '',
                     password: '',
                     email: '',
-                    phone: ''
+                    mobile: ''
                 },
                 addFormRules: {
                     username: [{
@@ -145,13 +145,13 @@
                             trigger: 'blur'
                         }
                     ],
-                    phone: [{
+                    mobile: [{
                             required: true,
-                            message: 'Please input Phone',
+                            message: 'Please input mobile',
                             trigger: 'blur'
                         },
                         {
-                            validator: checkPhone,
+                            validator: checkmobile,
                             trigger: 'blur'
                         }
                     ],
@@ -198,6 +198,18 @@
             // add a dialog close event 
             addDialogClosed() {
                 this.$refs.addFormRef.resetFields()
+            },
+            addUser() {
+                this.$refs.addFormRef.validate(async value => {
+                    if (!value) return
+                    const {
+                        data: res
+                    } = await this.$http.post('/users', this.addForm)
+                    if (res.meta.status !== 201) return this.$message.error('Falied to add user')
+                    this.$message.success('Succeed to add user')
+                    this.addDialogVisible = false
+                    this.getUserList()
+                })
             }
         }
     }
