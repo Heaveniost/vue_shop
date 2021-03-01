@@ -34,8 +34,9 @@
                     </template>
                 </el-table-column>
                 <el-table-column label="operation" width="180px">
-                    <template>
-                        <el-button type="primary" icon="el-icon-edit" size="mini"></el-button>
+                    <template v-slot="scope">
+                        <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog(scope.row.id)">
+                        </el-button>
                         <el-button type="danger" icon="el-icon-delete" size="mini"></el-button>
                         <el-tooltip effect="dark" content="Assign roles" placement="top" :enterable="false">
                             <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
@@ -63,6 +64,25 @@
                 <span slot="footer" class="dialog-footer">
                     <el-button @click="addDialogVisible = false">Cancel</el-button>
                     <el-button type="primary" @click="addUser">Confirm</el-button>
+                </span>
+            </el-dialog>
+
+            <!-- add dialog for edit user info-->
+            <el-dialog title="Edit User Info" :visible.sync="editDialogVisible" width="50%" @close="editDialogClosed">
+                <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="100px">
+                    <el-form-item label="username" prop="username">
+                        <el-input v-model="editForm.username" disabled></el-input>
+                    </el-form-item>
+                    <el-form-item label="email" prop="email">
+                        <el-input v-model="editForm.email"></el-input>
+                    </el-form-item>
+                    <el-form-item label="mobile" prop="mobile">
+                        <el-input v-model="editForm.mobile"></el-input>
+                    </el-form-item>
+                </el-form>
+                <span slot="footer" class="dialog-footer">
+                    <el-button @click="editDialogVisible = false">Cancel</el-button>
+                    <el-button type="primary" @click="editUserInfo">Confirm</el-button>
                 </span>
             </el-dialog>
 
@@ -155,6 +175,30 @@
                             trigger: 'blur'
                         }
                     ],
+                },
+                editDialogVisible: false, // show and hide edit dialog
+                editForm: {}, // query user information
+                editFormRules: {
+                    email: [{
+                            required: true,
+                            message: 'Please input Email',
+                            trigger: 'blur'
+                        },
+                        {
+                            validator: checkEmail,
+                            trigger: 'blur'
+                        }
+                    ],
+                    mobile: [{
+                            required: true,
+                            message: 'Please input mobile',
+                            trigger: 'blur'
+                        },
+                        {
+                            validator: checkmobile,
+                            trigger: 'blur'
+                        }
+                    ],
                 }
             }
         },
@@ -200,8 +244,8 @@
                 this.$refs.addFormRef.resetFields()
             },
             addUser() {
-                this.$refs.addFormRef.validate(async value => {
-                    if (!value) return
+                this.$refs.addFormRef.validate(async valid => {
+                    if (!valid) return
                     const {
                         data: res
                     } = await this.$http.post('/users', this.addForm)
@@ -209,6 +253,35 @@
                     this.$message.success('Succeed to add user')
                     this.addDialogVisible = false
                     this.getUserList()
+                })
+            },
+            // edit dialog 
+            async showEditDialog(id) {
+                const {
+                    data: res
+                } = await this.$http.get('/users/' + id)
+                if (res.meta.status !== 200) return this.$message.error('Failed to access user info')
+                this.editForm = res.data
+                console.log(res)
+                this.editDialogVisible = true
+            },
+            editDialogClosed() {
+                this.$refs.editFormRef.resetFields()
+            },
+            editUserInfo() {
+                this.$refs.editFormRef.validate(async valid => {
+                    if (!valid) return
+                    const {
+                        data: res
+                    } = await this.$http.put('users/' + this.editForm.id, {
+                        email: this.editForm.email,
+                        mobile: this.editForm.mobile
+                    })
+                    if(res.meta.status !== 200) return this.$message.error('Failed to update user info')
+                    // if succeed, close dialog, update list, prompt success
+                    this.editDialogVisible = false 
+                    this.getUserList()
+                    this.$message.success('Succeed to update user info')
                 })
             }
         }
