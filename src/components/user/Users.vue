@@ -37,7 +37,8 @@
                     <template v-slot="scope">
                         <el-button type="primary" icon="el-icon-edit" size="mini" @click="showEditDialog(scope.row.id)">
                         </el-button>
-                        <el-button type="danger" icon="el-icon-delete" size="mini"></el-button>
+                        <el-button type="danger" icon="el-icon-delete" size="mini"
+                            @click="removeUserById(scope.row.id)"></el-button>
                         <el-tooltip effect="dark" content="Assign roles" placement="top" :enterable="false">
                             <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
                         </el-tooltip>
@@ -277,12 +278,28 @@
                         email: this.editForm.email,
                         mobile: this.editForm.mobile
                     })
-                    if(res.meta.status !== 200) return this.$message.error('Failed to update user info')
+                    if (res.meta.status !== 200) return this.$message.error('Failed to update user info')
                     // if succeed, close dialog, update list, prompt success
-                    this.editDialogVisible = false 
+                    this.editDialogVisible = false
                     this.getUserList()
                     this.$message.success('Succeed to update user info')
                 })
+            },
+            // remove user by id 
+            async removeUserById(id) {
+                const result = await this.$confirm('This will permanently delete the user. Continue?', 'Warning', {
+                    confirmButtonText: 'OK',
+                    cancelButtonText: 'Cancel',
+                    type: 'warning'
+                }).catch(err => err)
+                console.log(result)
+                if (result !== 'confirm') return this.$message.info('Undelete user')
+                const {
+                    data: res
+                } = await this.$http.delete('users/' + id)
+                if (res.meta.status !== 200) return this.$message.error('Failed to delete user')
+                this.$message.success('Succeed to delete user')
+                this.getUserList()
             }
         }
     }
