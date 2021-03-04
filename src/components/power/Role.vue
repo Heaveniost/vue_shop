@@ -24,27 +24,26 @@
                             v-for="(item, index) in scope.row.children" :key="item.id">
                             <!-- Render Level 1 Permission -->
                             <el-col :span="5">
-                                <el-tag type="primary">{{ item.authName }}</el-tag>
+                                <el-tag type="primary" @close="removeAuthById(scope.row, item.id)" closable>{{ item.authName }}</el-tag>
                                 <i class="el-icon-caret-right"></i>
                             </el-col>
                             <!-- Render Level 2 Permission and Level 3 Permission -->
                             <el-col :span="19">
-                                <el-row :class="[i === 0 ? '' : 'bd-top', 'vertical-center']" v-for="(value, i) in item.children" :key="value.id">
+                                <el-row :class="[i === 0 ? '' : 'bd-top', 'vertical-center']"
+                                    v-for="(value, i) in item.children" :key="value.id">
                                     <el-col :span="6">
-                                        <el-tag type="success">{{ value.authName }}</el-tag>
+                                        <el-tag type="success" @close="removeAuthById(scope.row, value.id)" closable>{{ value.authName }}</el-tag>
                                         <i class="el-icon-caret-right"></i>
                                     </el-col>
                                     <el-col :span="18">
-                                        <el-tag type="warning" v-for="v in value.children" :key="v.id">
+                                        <el-tag type="warning" v-for="v in value.children" :key="v.id"
+                                            @close="removeAuthById(scope.row, v.id)" closable>
                                             {{ v.authName }}
                                         </el-tag>
                                     </el-col>
                                 </el-row>
                             </el-col>
                         </el-row>
-                        <pre>
-                            {{scope.row}}
-                        </pre>
                     </template>
                 </el-table-column>
                 <el-table-column type="index" label="#" width="60"></el-table-column>
@@ -224,6 +223,22 @@
                 if (res.meta.status !== 200) return this.$message.error('Failed to delete role')
                 this.$message.success('Succeed to delete role')
                 this.getRoleList()
+            },
+            async removeAuthById(role, rightId) {
+                const confirmResult = await this.$confirm("This will permanently delete the role's authority. Continue?",
+                    'Warning', {
+                        confirmButtonText: 'OK',
+                        cancelButtonText: 'Cancel',
+                        type: 'warning'
+                    }).catch(err => err)
+                if (confirmResult !== 'confirm') return this.$message.info("Undelete role's auth")
+                const {
+                    data: res
+                } = await this.$http.delete(`roles/${role.id}/rights/${rightId}`)
+                if (res.meta.status !== 200) return this.$message.error("Failed to delete role's auth")
+                this.$message.success("Succeed to delete role's autority")
+                // this.getRoleList() render the entire list and close the expand tag
+                role.children = res.data
             }
         }
     }
