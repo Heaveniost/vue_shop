@@ -24,7 +24,8 @@
                             v-for="(item, index) in scope.row.children" :key="item.id">
                             <!-- Render Level 1 Permission -->
                             <el-col :span="5">
-                                <el-tag type="primary" @close="removeAuthById(scope.row, item.id)" closable>{{ item.authName }}</el-tag>
+                                <el-tag type="primary" @close="removeAuthById(scope.row, item.id)" closable>
+                                    {{ item.authName }}</el-tag>
                                 <i class="el-icon-caret-right"></i>
                             </el-col>
                             <!-- Render Level 2 Permission and Level 3 Permission -->
@@ -32,7 +33,8 @@
                                 <el-row :class="[i === 0 ? '' : 'bd-top', 'vertical-center']"
                                     v-for="(value, i) in item.children" :key="value.id">
                                     <el-col :span="6">
-                                        <el-tag type="success" @close="removeAuthById(scope.row, value.id)" closable>{{ value.authName }}</el-tag>
+                                        <el-tag type="success" @close="removeAuthById(scope.row, value.id)" closable>
+                                            {{ value.authName }}</el-tag>
                                         <i class="el-icon-caret-right"></i>
                                     </el-col>
                                     <el-col :span="18">
@@ -58,7 +60,9 @@
                         </el-button>
                         <el-button type="danger" icon="el-icon-delete" size="mini"
                             @click="deleteRoleById(scope.row.id)">Delete</el-button>
-                        <el-button type="warning" icon="el-icon-setting" size="mini">Assign Permission</el-button>
+                        <el-button type="warning" icon="el-icon-setting" size="mini" @click="setAuthDialog(scope.row)">
+                            Assign
+                            Permission</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -99,6 +103,17 @@
             </span>
         </el-dialog>
 
+        <!-- add auth dialog -->
+        <el-dialog title="Assign Permissions" :visible.sync="setAuthDialogVisible" width="50%"
+            @close="setAuthDialogClosed">
+            <!-- tree component -->
+            <el-tree :data="authsList" :props="treeProps" show-checkbox node-key="id" default-expand-all
+                :default-checked-keys="defaultKeys" ref="treeRef"></el-tree>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="setAuthDialogVisible = false">Cancel</el-button>
+                <el-button type="primary" @click="allotAuths">Confirm</el-button>
+            </span>
+        </el-dialog>
     </div>
 </template>
 
@@ -151,7 +166,15 @@
                         message: 'Please input Role Description',
                         trigger: 'blur'
                     }],
-                }
+                },
+                setAuthDialogVisible: false, // show and hide assign permissions dialog
+                authsList: [], // authication list 
+                treeProps: { // tree's prop object
+                    label: 'authName',
+                    children: 'children'
+                },
+                defaultKeys: [], // node id to be displayed
+                roleId: '' // role id
             }
         },
         created() {
@@ -225,7 +248,8 @@
                 this.getRoleList()
             },
             async removeAuthById(role, rightId) {
-                const confirmResult = await this.$confirm("This will permanently delete the role's authority. Continue?",
+                const confirmResult = await this.$confirm(
+                    "This will permanently delete the role's authority. Continue?",
                     'Warning', {
                         confirmButtonText: 'OK',
                         cancelButtonText: 'Cancel',
@@ -239,6 +263,45 @@
                 this.$message.success("Succeed to delete role's autority")
                 // this.getRoleList() render the entire list and close the expand tag
                 role.children = res.data
+            },
+            // Show dialog of Assign Permissions
+            async setAuthDialog(role) {
+                this.roleId = role.id
+                const {
+                    data: res
+                } = await this.$http.get('rights/tree')
+                if (res.meta.status !== 200) return this.$message.error('Falied to access auth list')
+                // console.log(res)
+                this.authsList = res.data
+                // console.log(this.authsList)
+                this.getLeafKeys(role, this.defaultKeys)
+                this.setAuthDialogVisible = true
+            },
+            // Recursively get the ID of the role's three level permissions
+            getLeafKeys(node, arr) {
+                if (!node.children) return arr.push(node.id)
+                node.children.forEach(item => this.getLeafKeys(item, arr))
+            },
+            // Empty defaultKey data after closed the dialog
+            setAuthDialogClosed() {
+                this.defaultKeys = []
+            },
+            // allot role's auths
+            async allotAuths() {
+                const keys = [
+                    ...this.$refs.treeRef.getCheckedKeys(), ...this.$refs.treeRef.getHalfCheckedKeys()
+                ]
+                // console.log(keys)
+                const idStr = keys.join(',')
+                const {
+                    data: res
+                } = await this.$http.post(`roles/${this.roleId}/rights`, {
+                    rids: idStr
+                })
+                if (res.meta.status !== 200) return this.$message.error('Failed to assign authentication')
+                this.$message.success('Succeed to assign auth')
+                this.getRoleList()
+                this.setAuthDialogVisible = false
             }
         }
     }
