@@ -40,7 +40,8 @@
                         <el-button type="danger" icon="el-icon-delete" size="mini"
                             @click="removeUserById(scope.row.id)"></el-button>
                         <el-tooltip effect="dark" content="Assign roles" placement="top" :enterable="false">
-                            <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
+                            <el-button type="warning" icon="el-icon-setting" size="mini"
+                                @click="assignRoles(scope.row)"></el-button>
                         </el-tooltip>
                     </template>
                 </el-table-column>
@@ -87,12 +88,32 @@
                 </span>
             </el-dialog>
 
+            <!-- assign roles to users -->
+            <el-dialog title="Assgin Roles" :visible.sync="setRoleDialogVisible" width="50%"
+                @close="setRoleDialogClosed">
+                <div>
+                    <p>Current User: {{userinfo.username}}</p>
+                    <p>Current Role: {{userinfo.role_name}}</p>
+                    <p>Assign New Role:
+                        <el-select v-model="selectRoleId" placeholder="Select">
+                            <el-option v-for="item in rolesList" :key="item.id" :label="item.roleName" :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </p>
+                </div>
+                <span slot="footer" class="dialog-footer">
+                    <el-button @click="setRoleDialogVisible = false">Cancel</el-button>
+                    <el-button type="primary" @click="saveRoleInfo">Confirm</el-button>
+                </span>
+            </el-dialog>
+
             <!-- pagination area -->
             <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
                 :current-page.sync="queryInfo.pagenum" :page-sizes="[1, 2, 5, 10]" :page-size="queryInfo.pagesize"
                 layout="total, sizes, prev, pager, next, jumper" :total="total">
             </el-pagination>
         </el-card>
+
 
     </div>
 </template>
@@ -175,7 +196,7 @@
                             validator: checkmobile,
                             trigger: 'blur'
                         }
-                    ],
+                    ]
                 },
                 editDialogVisible: false, // show and hide edit dialog
                 editForm: {}, // query user information
@@ -200,7 +221,11 @@
                             trigger: 'blur'
                         }
                     ],
-                }
+                },
+                setRoleDialogVisible: false,
+                userinfo: {},
+                rolesList: [],
+                selectRoleId: ''
             }
         },
         created() {
@@ -300,6 +325,34 @@
                 if (res.meta.status !== 200) return this.$message.error('Failed to delete user')
                 this.$message.success('Succeed to delete user')
                 this.getUserList()
+            },
+            async assignRoles(userinfo) {
+                this.userinfo = userinfo
+                // console.log(userinfo)
+                const {
+                    data: res
+                } = await this.$http.get('roles')
+                if (res.meta.status !== 200) return this.$message.error('Falied to access roles')
+                this.rolesList = res.data
+                // console.log(this.rolesList)
+                this.setRoleDialogVisible = true
+            },
+            async saveRoleInfo() {
+                // console.log(this.selectRoleId)
+                if (!this.selectRoleId) return this.$message.error('Please choose a role for user')
+                const {
+                    data: res
+                } = await this.$http.put(`users/${this.userinfo.id}/role`, {
+                    rid: this.selectRoleId
+                })
+                if (res.meta.status !== 200) return this.$message.error('Failed to assign roles')
+                this.$message.success('Succeed to updata roles')
+                this.getUserList()
+                this.setRoleDialogVisible = false
+            },
+            setRoleDialogClosed() {
+                this.selectRoleId = ''
+                this.userinfo = ''
             }
         }
     }
