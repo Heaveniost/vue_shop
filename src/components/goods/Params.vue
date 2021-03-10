@@ -35,7 +35,8 @@
                                 <el-button type="primary" icon="el-icon-edit" size="mini"
                                     @click="showEditDialog(scope.row.attr_id)">Edit
                                 </el-button>
-                                <el-button type="danger" icon="el-icon-delete" size="mini">Delete</el-button>
+                                <el-button type="danger" icon="el-icon-delete" size="mini"
+                                    @click="removeParams(scope.row.attr_id)">Delete</el-button>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -55,7 +56,8 @@
                                 <el-button type="primary" icon="el-icon-edit" size="mini"
                                     @click="showEditDialog(scope.row.attr_id)">Edit
                                 </el-button>
-                                <el-button type="danger" icon="el-icon-delete" size="mini">Delete</el-button>
+                                <el-button type="danger" icon="el-icon-delete" size="mini"
+                                    @click="removeParams(scope.row.attr_id)">Delete</el-button>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -248,6 +250,22 @@
                     this.getParamsData()
                     this.editDialogVisible = false
                 })
+            },
+            // remove params according id
+            async removeParams(id) {
+                const confirmResult = await this.$confirm('This will permanently delete the params. Continue?',
+                    'Warning', {
+                        confirmButtonText: 'OK',
+                        cancelButtonText: 'Cancel',
+                        type: 'warning'
+                    }).catch(err => err)
+                if (confirmResult !== 'confirm') return this.$message.info('Undelete params')
+                const {
+                    data: res
+                } = await this.$http.delete(`categories/${this.cateId}/attributes/${id}`)
+                if (res.meta.status !== 200) return this.$message.error('Failed to delete params')
+                this.$message.success('Succeed to delete params')
+                this.getParamsData()
             }
         }
     }
