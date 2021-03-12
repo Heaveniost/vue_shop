@@ -27,7 +27,21 @@
 
                     <!-- dynamic table -->
                     <el-table :data="dynamicData" border stripe>
-                        <el-table-column type="expand"></el-table-column>
+                        <el-table-column type="expand">
+                            <template v-slot="scope">
+                                <el-tag v-for="(item, index) in scope.row.attr_vals" :key="index" closable>
+                                    {{ item }}
+                                </el-tag>
+                                <!-- input text -->
+                                <el-input class="input-new-tag" v-if="scope.row.inputVisible" v-model="scope.row.inputValue"
+                                    ref="saveTagInput" size="mini" @keyup.enter.native="handleInputConfirm(scope.row)"
+                                    @blur="handleInputConfirm(scope.row)">
+                                </el-input>
+                                <!-- add button -->
+                                <el-button v-else class="button-new-tag" size="small" @click="showInput(scope.row)">+ New Tag
+                                </el-button>
+                            </template>
+                        </el-table-column>
                         <el-table-column type="index" label="#"></el-table-column>
                         <el-table-column label="attr_name" prop="attr_name"></el-table-column>
                         <el-table-column label="operation">
@@ -132,7 +146,9 @@
                         message: 'Please params name',
                         trigger: 'blur'
                     }]
-                }
+                },
+                // inputVisible: false, // toggle input text and add button
+                // inputValue: '',
             }
         },
         created() {
@@ -195,6 +211,13 @@
                     }
                 })
                 if (res.meta.status !== 200) return this.$message.error('Failed to loading info')
+                // console.log(res.data)
+                res.data.forEach(item => {
+                    item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : []
+                    // show and hide input text box
+                    item.inputVisible = false
+                    item.inputValue = ''
+                })
                 // console.log(res.data)
                 if (this.activeName === 'many') {
                     this.dynamicData = res.data
@@ -266,17 +289,39 @@
                 if (res.meta.status !== 200) return this.$message.error('Failed to delete params')
                 this.$message.success('Succeed to delete params')
                 this.getParamsData()
-            }
+            },
+            // input text blur or press the enter key
+            handleInputConfirm(row) {
+                row.inputVisible = false
+                console.log('ok')
+            },
+            showInput(row) {
+                console.log(row)
+                row.inputVisible = true;
+                // let the input box get focus automatically
+                // $nextTick: 当页面上的元素被重新渲染后，才会执行回调函数中的代码
+                this.$nextTick(_ => {
+                    this.$refs.saveTagInput.$refs.input.focus();
+                });
+            },
         }
     }
 </script>
 
-<style>
+<style lang="less" scoped>
     .cate_opt {
         margin: 15px 0;
     }
 
     .el-cascader {
         margin-left: 10px;
+    }
+
+    .el-tag {
+        margin: 5px;
+    }
+
+    .input-new-tag {
+        width: 120px;
     }
 </style>
