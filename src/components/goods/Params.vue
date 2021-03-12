@@ -29,7 +29,8 @@
                     <el-table :data="dynamicData" border stripe>
                         <el-table-column type="expand">
                             <template v-slot="scope">
-                                <el-tag v-for="(item, index) in scope.row.attr_vals" :key="index" closable>
+                                <el-tag v-for="(item, index) in scope.row.attr_vals" :key="index" closable
+                                    @close="handleClose(index, scope.row)">
                                     {{ item }}
                                 </el-tag>
                                 <!-- input text -->
@@ -202,6 +203,8 @@
                 const len = this.selectedCateKeys.length
                 if (len !== 3) {
                     this.selectedCateKeys = []
+                    this.dynamicData = []
+                    this.staticData = []
                     return
                 }
                 // console.log(this.selectedCateKeys)
@@ -302,6 +305,10 @@
                 row.attr_vals.push(row.inputValue.trim())
                 row.inputValue = ''
                 row.inputVisible = false
+                this.saveAttrVals(row)
+            },
+            // save the result of attr_vals to the database
+            async saveAttrVals(row) {
                 const {
                     data: res
                 } = await this.$http.put(`categories/${this.cateId}/attributes/${row.attr_id}`, {
@@ -309,7 +316,6 @@
                     attr_sel: row.attr_sel,
                     attr_vals: row.attr_vals.join(' ')
                 })
-                // console.log(res)
                 if (res.meta.status !== 200) return this.$message.error('Failed to update params')
                 this.$message.success('Succeed to update params')
             },
@@ -322,6 +328,10 @@
                     this.$refs.saveTagInput.$refs.input.focus();
                 });
             },
+            handleClose(index, row) {
+                row.attr_vals.splice(index, 1)
+                this.saveAttrVals(row)
+            }
         }
     }
 </script>
