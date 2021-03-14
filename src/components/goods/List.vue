@@ -26,8 +26,12 @@
         <el-table-column type="index"></el-table-column>
         <el-table-column label="Goods Name" prop="goods_name"></el-table-column>
         <el-table-column label="Goods Price" prop="goods_price" width="120"></el-table-column>
-        <el-table-column label="Goods Weight" prop="goods_weight"  width="130"></el-table-column>
-        <el-table-column label="Created Time" prop="add_time" width="130"></el-table-column>
+        <el-table-column label="Goods Weight" prop="goods_weight" width="130"></el-table-column>
+        <el-table-column label="Created Time" prop="add_time" width="160">
+          <template v-slot="scope">
+            {{scope.row.add_time | dateFormat}}
+          </template>
+        </el-table-column>
         <el-table-column label="Operation" width="130">
           <template v-slot="scope">
             <el-button type="primary" icon="el-icon-edit" size="mini"></el-button>
