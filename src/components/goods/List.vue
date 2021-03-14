@@ -40,6 +40,12 @@
         </el-table-column>
       </el-table>
 
+      <!-- pagination area -->
+      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
+        :current-page.sync="queryInfo.pagenum" :page-sizes="[5, 10, 15, 20]" :page-size="queryInfo.pagesize"
+        layout="total, sizes, prev, pager, next, jumper" :total="total" background>
+      </el-pagination>
+
     </el-card>
   </div>
 </template>
@@ -73,7 +79,15 @@
         // console.log(res.data)
         this.goodsList = res.data.goods
         this.total = res.data.total
-        console.log(this.goodsList)
+        // console.log(this.goodsList)
+      },
+      handleSizeChange(newSize) {
+        this.queryInfo.pagesize = newSize
+        this.getGoodsList()
+      },
+      handleCurrentChange(newPage) {
+        this.queryInfo.pagenum = newPage
+        this.getGoodsList
       }
     }
   };
