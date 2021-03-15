@@ -3,7 +3,8 @@ import {
     Button, Form, FormItem, Input, Message, Container, Header, Aside, Main, 
     Menu, Submenu, MenuItemGroup, MenuItem, Breadcrumb, BreadcrumbItem, Card,
     Row, Col, Table, TableColumn, Switch, Tooltip, Pagination, Dialog, MessageBox,
-    Tag, Tree, Select, Option, Cascader, Alert, Tabs, TabPane
+    Tag, Tree, Select, Option, Cascader, Alert, Tabs, TabPane, Steps, Step,
+    Checkboxckbox, CheckboxGroup, Checkbox, Upload
 } from 'element-ui'
 import { options } from 'less'
 
@@ -38,5 +39,10 @@ Vue.use(Cascader)
 Vue.use(Alert)
 Vue.use(Tabs)
 Vue.use(TabPane)
+Vue.use(Steps)
+Vue.use(Step)
+Vue.use(Checkbox)
+Vue.use(CheckboxGroup)
+Vue.use(Upload)
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm

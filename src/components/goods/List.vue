@@ -12,12 +12,12 @@
       <!-- search and append area -->
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-input placeholder="Please input" v-model="queryInfo.query" clearable>
-            <el-button slot="append" icon="el-icon-search"></el-button>
+          <el-input placeholder="Please input" v-model="queryInfo.query" clearable @clear="getGoodsList">
+            <el-button slot="append" icon="el-icon-search" @click="getGoodsList"></el-button>
           </el-input>
         </el-col>
         <el-col :span="4">
-          <el-button type="primary">add goods</el-button>
+          <el-button type="primary" @click="toAddPage">add goods</el-button>
         </el-col>
       </el-row>
 
@@ -35,7 +35,7 @@
         <el-table-column label="Operation" width="130">
           <template v-slot="scope">
             <el-button type="primary" icon="el-icon-edit" size="mini"></el-button>
-            <el-button type="danger" icon="el-icon-delete" size="mini"></el-button>
+            <el-button type="danger" icon="el-icon-delete" size="mini" @click="deleteGoodsById(scope.row.goods_id)"></el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -61,7 +61,6 @@
         },
         goodsList: [],
         total: 0
-
       };
     },
     created() {
@@ -87,7 +86,26 @@
       },
       handleCurrentChange(newPage) {
         this.queryInfo.pagenum = newPage
-        this.getGoodsList
+        this.getGoodsList()
+      },
+      async deleteGoodsById(id) {
+        const confirmResult = await this.$confirm('This will permanently delete the role. Continue?',
+          'Warning', {
+            confirmButtonText: 'OK',
+            cancelButtonText: 'Cancel',
+            type: 'warning'
+          }).catch(err => err)
+        // console.log(result)
+        if (confirmResult !== 'confirm') return this.$message.info('Undelete goods')
+        const {
+          data: res
+        } = await this.$http.delete('goods/' + id)
+        if (res.meta.status !== 200) return this.$message.error('Failed to delete role')
+        this.$message.success('Succeed to delete goods')
+        this.getGoodsList()
+      },
+      toAddPage(){
+        this.$router.push('/goods/add')
       }
     }
   };
