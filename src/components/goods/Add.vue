@@ -40,7 +40,7 @@
                         <el-form-item label="Goods Number" prop="goods_number">
                             <el-input v-model="addForm.goods_number" type="number"></el-input>
                         </el-form-item>
-                        <el-form-item label="Goods Category" prop="goods_cate">
+                        <el-form-item label="Goods Category" prop="goods_cat">
                             <!-- options: data origin -->
                             <el-cascader v-model="addForm.goods_cat" :options="cateList" :props="cascaderProps"
                                 @change="handleChange" clearable></el-cascader>
@@ -69,6 +69,9 @@
                         </el-upload>
                     </el-tab-pane>
                     <el-tab-pane label="Content" name="4">
+                        <!-- Rich text editor component -->
+                        <quill-editor v-model="addForm.goods_introduce"></quill-editor>
+                        <el-button type="primary" class="addBtn" @click="addGoods">Add Goods</el-button>
                     </el-tab-pane>
                 </el-tabs>
             </el-form>
@@ -82,6 +85,8 @@
 </template>
 
 <script>
+    import _ from 'lodash'
+
     export default {
         data() {
             return {
@@ -93,7 +98,9 @@
                     goods_weight: 0,
                     goods_number: 0,
                     goods_cat: [],
-                    pics: []
+                    pics: [],
+                    goods_introduce: '',
+                    attrs: []
                 },
                 addFormRules: {
                     goods_name: [{
@@ -116,7 +123,7 @@
                         message: 'Please input goods number',
                         trigger: 'blur'
                     }],
-                    goods_cate: [{
+                    goods_cat: [{
                         required: true,
                         message: 'Please choose goods category',
                         trigger: 'blur'
@@ -233,7 +240,41 @@
                     pic: response.data.tmp_path
                 }
                 this.addForm.pics.push(picInfo)
-                console.log(this.addForm)
+                // console.log(this.addForm)
+            },
+            addGoods() {
+                this.$refs.addFormRef.validate(async valid => {
+                    if (!valid) {
+                        return this.$message.error('Please input essential form item')
+                    }
+                    // console.log('ok')
+                    // handle dynamic data and static data 
+                    this.dynamicTableData.forEach(item => {
+                        const newInfo = {
+                            attr_id: item.attr_id,
+                            attr_value: item.attr_vals.join(' ')
+                        }
+                        this.addForm.attrs.push(newInfo)
+                    })
+                    this.staticTableData.forEach(item => {
+                        const newInfo = {
+                            attr_id: item.attr_id,
+                            attr_value: item.attr_vals
+                        }
+                        this.addForm.attrs.push(newInfo)
+                    })
+                    const form = _.cloneDeep(this.addForm)
+                    form.goods_cat = form.goods_cat.join(',')
+                    // console.log(form)
+                    // request to send 
+                    const {
+                        data: res
+                    } = await this.$http.post('goods', form)
+                    if (res.meta.status !== 201) return this.$message.error(
+                        'Failed to add goods')
+                    this.$message.success('Succeed to add goods')
+                    this.$router.push('/goods')
+                })
             }
         }
     }
@@ -243,7 +284,12 @@
     .el-checkbox {
         margin: 0 10px 0 0 !important;
     }
+
     .previewImg {
         width: 100%;
+    }
+
+    .addBtn {
+        margin-top: 15px;
     }
 </style>
