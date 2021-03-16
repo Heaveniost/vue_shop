@@ -75,8 +75,8 @@
                 const { data: res } = await this.$http.get('menus')
                 if (res.meta.status !== 200) return this.$http.message.error(res.meta.msg)
                 this.menuList = res.data
-                console.log(res)
-                console.log(this.menuList)
+                // console.log(res)
+                // console.log(this.menuList)
             },
             // 点击展开与折叠菜单栏
             toggleCollapse() {
